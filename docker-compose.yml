@@ -1,0 +1,42 @@
+version: '3.8'
+volumes:
+  mysql-data:
+    name: ${PROJECT_NAME}-data
+
+networks:
+  network-id:
+    name: ${PROJECT_NAME}-network
+
+services:
+  app:
+    build:
+      context: '.'
+      dockerfile: Dockerfile
+    container_name: prueba
+    volumes:
+      - ./:/var/www/html  # Monta el directorio actual en el contenedor
+    ports:
+      - 8080:80
+    environment:
+      - APACHE_RUN_USER=www-data
+      - APACHE_RUN_GROUP=www-data
+      - UID=1000  # Ajusta este valor según el usuario de tu host
+      - GID=1000  # Ajusta este valor según el grupo de tu host
+    links:
+      - mysql
+    networks:
+      - network-id
+
+  # MySQL Database
+  mysql:
+    image: mysql:8
+    ports:
+      - '3306:3306'
+    container_name: prueba_mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: '${DB_PASSWORD}'  # Asegúrate de definir estas variables
+      MYSQL_DATABASE: '${DB_DATABASE}'
+      MYSQL_USER: '${DB_USERNAME}'
+      MYSQL_PASSWORD: '${DB_PASSWORD}'
+    networks:
+      - network-id
